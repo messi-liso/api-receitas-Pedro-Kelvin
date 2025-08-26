@@ -27,5 +27,4 @@ def hello():
 
 @app.get("/receitas/{receita}")
 def get_receita():
-    def get_receita_by_name(nome: str):
-        return{receita}
+    return{}
