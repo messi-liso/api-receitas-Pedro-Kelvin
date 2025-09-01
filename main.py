@@ -26,5 +26,7 @@ def hello():
     return{"title": "livro de receitas"}
 
 @app.get("/receitas/{receita}")
-def get_receita():
-    return{}
+def get_receita(receita: str):
+    for i in receitas:
+        if i['nome'] == receita:
+            return i['ingredientes']
