@@ -40,15 +40,17 @@ receitas: List[Receita] = []
 def hello():
     return{"title": "livro de receitas"}
 
-@app.get('/receitas/')
+@app.get('/receitas')
 def get_todas_receitas():
     return receitas
 
-@app.get("/receitas/{receita}")
+@app.get("/receitas/{nome_receita}")
 def get_receita(receita: str):
-    for i in receitas:
-        if i['nome'] == receita:
-            return i['ingredientes']
+    for receita in receitas:
+        if receita.nome == nome_receita:
+            return receita
+        
+    return {"receita não encontrada"}
         
 @app.post("/receitas", response_model=Receita, status_code=201)
 def criar_receita(dados: Receita):
