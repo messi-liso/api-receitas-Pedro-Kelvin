@@ -29,7 +29,16 @@ receitas = [
     }
 ]
 '''
+
+
+class CreateReceita(BaseModel):
+    nome: str
+    ingredientes: List[str]
+    modo_de_preparo: str
+
+
 class Receita(BaseModel):
+    id: int
     nome: str
     ingredientes: List[str]
     modo_de_preparo: str
@@ -52,24 +61,26 @@ def get_receita(receita: str):
         
     return {"receita não encontrada"}
         
-@app.post("/receitas", response_model=Receita, status_code=201)
-def criar_receita(dados: Receita):
+@app.post("/receitas")
+def criar_receita(dados: CreateReceita):
+    if len(receitas) == 0:
+        id = 1
+        novo_id = id
+    elif len(receitas) > 0:
+        id = len(receitas)+1
+        novo_id = id
+
+
+        
+
     
-    nova_receita = dados
+    nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
+    if len(receitas) > 0:
+        for receita in receitas:
+            if receita.nome == dados.nome:
+                    return {"receita repetida"}
     receitas.append(nova_receita)
     
     return nova_receita
 
-@app.put("/receitas/{id}")
-def update_receita(id: int, dades: CreateReceita):
-    for i in range(len(receitas)):
-        if receitas[i].id == id:
-            receita_atualizada = Receita(
-                id=id
-                nome=dados.nome,
-                ingredientes=dados.ingredientes
-                modo_de_preparo=dados.modo_de_preparo
-            )
-            receitas[i] = (receita_atualizada)
-            return receita_atualizada
-    return {"mensagem": "Receita Não Encontrada"}
+
