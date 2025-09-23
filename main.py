@@ -74,7 +74,7 @@ def criar_receita(dados: CreateReceita):
         id = len(receitas)+1
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
-    receitas.append(nova_receita)
+        receitas.append(nova_receita)
     
     return nova_receita
     
