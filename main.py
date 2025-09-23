@@ -30,12 +30,6 @@ receitas = [
 ]
 '''
 
-class CreateReceita(BaseModel):
-    nome: str
-    ingredientes: List[str]
-    modo_de_preparo: str
-
-
 
 class CreateReceita(BaseModel):
     nome: str
@@ -44,7 +38,6 @@ class CreateReceita(BaseModel):
 
 
 class Receita(BaseModel):
-    id: int
     id: int
     nome: str
     ingredientes: List[str]
@@ -70,22 +63,17 @@ def get_receita(nome_receita: str):
         
 @app.post("/receitas")
 def criar_receita(dados: CreateReceita):
+    if len(receitas) > 0:
+        for receita in receitas:
+            if receita.nome == dados.nome:
+                return {"receita repetida"}
     if len(receitas) == 0:
         id = 1
         novo_id = id
     elif len(receitas) > 0:
         id = len(receitas)+1
         novo_id = id
-
-
-        
-
-    
-    nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
-    if len(receitas) > 0:
-        for receita in receitas:
-            if receita.nome == dados.nome:
-                    return {"receita repetida"}
+        nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
     receitas.append(nova_receita)
     
     return nova_receita
@@ -96,11 +84,19 @@ def update_receita(id: int, dados: CreateReceita):
     for i in range(len(receitas)):
         if receitas[i].id == id:
             receita_atualizada = Receita(
-                id=id,
-                nome=dados.nome,
-                ingredientes=dados.ingredientes,
-                modo_de_preparo=dados.modo_de_preparo
+                id = id,
+                nome = dados.nome,
+                ingredientes = dados.ingredientes,
+                modo_de_preparo = dados.modo_de_preparo
             )
             receitas[i] = receita_atualizada
             return receita_atualizada
     return {"mensagem": "Receita Não Encontrada"}
+
+@app.delete("/receitas/{id}")
+def deletar_receita(id: int):
+    for i in range(len(receitas)):
+        if receitas[i].id == id:
+            receitas.pop(i)
+            return{"mensagem": "Receita excluida"}
+    return{"mensagem": "receita não encontrada"}
