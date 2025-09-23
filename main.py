@@ -70,12 +70,13 @@ def criar_receita(dados: CreateReceita):
     if len(receitas) == 0:
         id = 1
         novo_id = id
+        nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
+        receitas.append(nova_receita)
     elif len(receitas) > 0:
         id = len(receitas)+1
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
         receitas.append(nova_receita)
-    
     return nova_receita
     
 
