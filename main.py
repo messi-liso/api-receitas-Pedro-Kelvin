@@ -96,8 +96,12 @@ def update_receita(id: int, dados: CreateReceita):
 
 @app.delete("/receitas/{id}")
 def deletar_receita(id: int):
-    for i in range(len(receitas)):
-        if receitas[i].id == id:
-            receitas.pop(i)
-            return{"mensagem": "Receita excluida"}
+    if len(receitas) == 0:
+        return {"mensagem": "não há receitas para excluir"}
+    if len(receitas) > 0:
+        for i in range(len(receitas)):
+            if receitas[i].id == id:
+                receta_deletada = receitas[i].nome
+                receitas.pop(i)
+                return{"mensagem": f"Receita excluida: '{receta_deletada}'"}
     return{"mensagem": "receita não encontrada"}
