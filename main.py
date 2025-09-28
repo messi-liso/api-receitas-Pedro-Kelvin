@@ -64,7 +64,7 @@ def get_receita(nome_receita: str):
 @app.get("/receitas/id/{id}")
 def get_receita_por_id(id: int):
     for i in receitas:
-        if receitas[i] == id:
+        if receitas[i].id == id:
             return receitas[i]
     
     return {"receita por id não encontrada"}
