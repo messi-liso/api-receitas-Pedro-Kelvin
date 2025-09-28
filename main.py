@@ -53,19 +53,21 @@ def hello():
 def get_todas_receitas():
     return receitas
 
-@app.get("/receitas/{nome_receita}")
+@app.get("/receitas/nome/{nome_receita}")
 def get_receita(nome_receita: str):
     for receita in receitas:
         if receita.nome == nome_receita:
             return receita
         
-    return {"receita não encontrada"}
+    return {"receita por nome não encontrada"}
 
-@app.get("/receitas/{id}")
+@app.get("/receitas/id/{id}")
 def get_receita_por_id(id: int):
     for i in receitas:
         if receitas[i] == id:
             return receitas[i]
+    
+    return {"receita por id não encontrada"}
         
 
 @app.post("/receitas")
