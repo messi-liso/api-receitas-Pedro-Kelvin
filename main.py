@@ -60,7 +60,14 @@ def get_receita(nome_receita: str):
             return receita
         
     return {"receita não encontrada"}
+
+@app.get("/receitas/{id}")
+def get_receita_por_id(id: int):
+    for i in receitas:
+        if receitas[i].id == id:
+            return receitas[i]
         
+
 @app.post("/receitas")
 def criar_receita(dados: CreateReceita):
     if len(receitas) > 0:
