@@ -91,6 +91,10 @@ def criar_receita(dados: CreateReceita):
 
 @app.put("/receitas/{id}")
 def update_receita(id: int, dados: CreateReceita):
+    for Receita in receitas:
+        if Receita.id != id and Receita.nome == dados.nome:
+            return {"mensagem": "receita com esse nome já existe"}
+        
     for i in range(len(receitas)):
         if receitas[i].id == id:
             receita_atualizada = Receita(
