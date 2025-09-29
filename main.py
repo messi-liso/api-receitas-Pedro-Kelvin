@@ -80,6 +80,9 @@ def criar_receita(dados: CreateReceita):
         id = 1
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
+        if len(dados.nome) < 2 or len(dados.nome) > 50:
+            return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
+
         if len(nova_receita.ingredientes) <= 0 or len(nova_receita.ingredientes) >= 21:
             return {"mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20"}
         else:
@@ -89,6 +92,8 @@ def criar_receita(dados: CreateReceita):
         id = len(receitas)+1
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
+        if len(dados.nome) < 2 or len(dados.nome) > 50:
+            return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
         if len(nova_receita.ingredientes) <= 0 or len(nova_receita.ingredientes) >= 21:
             return {"mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20"}
         else:
