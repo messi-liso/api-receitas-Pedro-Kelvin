@@ -80,12 +80,19 @@ def criar_receita(dados: CreateReceita):
         id = 1
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
-        receitas.append(nova_receita)
+        if len(nova_receita.ingredientes) <= 0 or len(nova_receita.ingredientes) >= 21:
+            return {"mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20"}
+        else:
+            receitas.append(nova_receita)
+            
     elif len(receitas) > 0:
         id = len(receitas)+1
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
-        receitas.append(nova_receita)
+        if len(nova_receita.ingredientes) <= 0 or len(nova_receita.ingredientes) >= 21:
+            return {"mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20"}
+        else:
+            receitas.append(nova_receita)
     return nova_receita
     
 
