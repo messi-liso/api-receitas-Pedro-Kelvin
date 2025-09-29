@@ -105,6 +105,8 @@ def criar_receita(dados: CreateReceita):
 def update_receita(id: int, dados: CreateReceita):
     if len(dados.nome) < 2 or len(dados.nome) > 50:
                 return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
+    if len(dados.ingredientes) < 1 or len(dados.ingredientes) > 20:
+                return {"mensagem": "a receita deve ter no minimo 1 ingrediente e no maximo 20"}
     for receita in receitas:
         if receita.id != id and receita.nome == dados.nome:
             return {"mensagem": "receita com esse nome já existe"}
