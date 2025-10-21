@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
+from schema import CreateReceita, Receita
+from http import HTTPStatus
 
 app = FastAPI(title='livro de receitas')
 
@@ -29,31 +31,18 @@ receitas = [
     }
 ]
 '''
-
-
-class CreateReceita(BaseModel):
-    nome: str
-    ingredientes: List[str]
-    modo_de_preparo: str
-
-
-class Receita(BaseModel):
-    id: int
-    nome: str
-    ingredientes: List[str]
-    modo_de_preparo: str
     
 receitas: List[Receita] = []
 
-@app.get("/")
+@app.get("/", status_code=HTTPStatus.OK)
 def hello():
     return{"title": "livro de receitas"}
 
-@app.get('/receitas')
+@app.get('/receitas', response_model=List[Receita], status_code=HTTPStatus.OK)
 def get_todas_receitas():
     return receitas
 
-@app.get("/receitas/nome/{nome_receita}")
+@app.get("/receitas/nome/{nome_receita}", response_model=List[Receita], status_code=HTTPStatus.OK)
 def get_receita(nome_receita: str):
     for receita in receitas:
         if receita.nome == nome_receita:
@@ -61,7 +50,7 @@ def get_receita(nome_receita: str):
         
     return {"receita por nome não encontrada"}
 
-@app.get("/receitas/id/{id}")
+@app.get("/receitas/id/{id}", response_model=List[Receita], status_code=HTTPStatus.OK)
 def get_receita_por_id(id: int):
     for i in range(len(receitas)):
         if receitas[i].id == id:
@@ -70,7 +59,7 @@ def get_receita_por_id(id: int):
     return {"receita por id não encontrada"}
         
 
-@app.post("/receitas")
+@app.post("/receitas", response_model=List[Receita], status_code=HTTPStatus.CREATED)
 def criar_receita(dados: CreateReceita):
     if len(receitas) > 0:
         for receita in receitas:
@@ -101,7 +90,7 @@ def criar_receita(dados: CreateReceita):
     return nova_receita
     
 
-@app.put("/receitas/{id}")
+@app.put("/receitas/{id}", response_model=List[Receita], status_code=HTTPStatus.OK)
 def update_receita(id: int, dados: CreateReceita):
     if len(dados.nome) < 2 or len(dados.nome) > 50:
                 return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
@@ -123,7 +112,7 @@ def update_receita(id: int, dados: CreateReceita):
             return receita_atualizada
     return {"mensagem": "Receita Não Encontrada"}
 
-@app.delete("/receitas/{id}")
+@app.delete("/receitas/{id}", response_model=List[Receita], status_code=HTTPStatus.OK)
 def deletar_receita(id: int):
     if len(receitas) == 0:
         return {"mensagem": "não há receitas para excluir"}
