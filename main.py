@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-from schema import CreateReceita, Receita
+from schema import CreateReceita, Receita, Usuario, UsuarioPublic, BaseUsuario
 from http import HTTPStatus
 
 app = FastAPI(title='livro de receitas')
@@ -31,7 +31,9 @@ receitas = [
     }
 ]
 '''
-    
+
+usuarios: List[Usuario]
+
 receitas: List[Receita] = []
 
 @app.get("/", status_code=HTTPStatus.OK)
@@ -59,7 +61,38 @@ def get_receita_por_id(id: int):
     return {"receita por id não encontrada"}
         
 
-@app.post("/receitas", response_model=List[Receita], status_code=HTTPStatus.CREATED)
+@app.post("/usuarios", response_model=UsuarioPublic, status_code=HTTPStatus.CREATED)
+def criar_usuario(dados: BaseUsuario):
+    if len(usuarios) > 0:
+        for usuario in usuarios:
+            if usuario.nome == dados.nome:
+                return {"Usuario já existente"}
+    if len(usuarios) == 0:
+        id = 1
+        novo_id = id
+        novo_usuario = Usuario(id = novo_id, nome = dados.nome, email = dados.email, senha = dados.senha)
+        if len(dados.nome) < 2 or len(dados.nome) > 50:
+            return {"mensagem": "o nome do usuario deve ter entre 2 e 50 caracteres"}
+
+        if len(novo_usuario.email) <= 0 or len(novo_usuario) >= 50:
+            return {"mensagem": "o email deve ter entre 1 e 50 caracteres"}
+        else:
+            usuarios.append(novo_usuario)
+            
+    elif len(usuarios) > 0:
+        id = len(usuarios)+1
+        novo_id = id
+        novo_usuario = Usuario(id = novo_id, nome = dados.nome, email = dados.email, senha = dados.senha)
+        if len(dados.nome) < 2 or len(dados.nome) > 50:
+            return {"mensagem": "o nome do usuario deve ter entre 2 e 50 caracteres"}
+
+        if len(novo_usuario.email) <= 0 or len(novo_usuario) >= 50:
+            return {"mensagem": "o email deve ter entre 1 e 50 caracteres"}
+        else:
+            usuarios.append(novo_usuario)
+    return novo_usuario
+
+@app.post("/receitas", response_model=Receita, status_code=HTTPStatus.CREATED)
 def criar_receita(dados: CreateReceita):
     if len(receitas) > 0:
         for receita in receitas:
@@ -90,7 +123,7 @@ def criar_receita(dados: CreateReceita):
     return nova_receita
     
 
-@app.put("/receitas/{id}", response_model=List[Receita], status_code=HTTPStatus.OK)
+@app.put("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
 def update_receita(id: int, dados: CreateReceita):
     if len(dados.nome) < 2 or len(dados.nome) > 50:
                 return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
@@ -112,7 +145,7 @@ def update_receita(id: int, dados: CreateReceita):
             return receita_atualizada
     return {"mensagem": "Receita Não Encontrada"}
 
-@app.delete("/receitas/{id}", response_model=List[Receita], status_code=HTTPStatus.OK)
+@app.delete("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
 def deletar_receita(id: int):
     if len(receitas) == 0:
         return {"mensagem": "não há receitas para excluir"}
