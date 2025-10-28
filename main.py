@@ -50,7 +50,8 @@ def get_receita(nome_receita: str):
         if receita.nome == nome_receita:
             return receita
         
-    return {"receita por nome não encontrada"}
+    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Receita não encontrada")
+
 
 @app.get("/receitas/id/{id}", response_model=List[Receita], status_code=HTTPStatus.OK)
 def get_receita_por_id(id: int):
@@ -58,7 +59,7 @@ def get_receita_por_id(id: int):
         if receitas[i].id == id:
             return receitas[i]
     
-    return {"receita por id não encontrada"}
+    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Receita por ID não encontrada")
         
 
 @app.post("/usuarios", response_model=UsuarioPublic, status_code=HTTPStatus.CREATED)
@@ -97,16 +98,15 @@ def criar_receita(dados: CreateReceita):
     if len(receitas) > 0:
         for receita in receitas:
             if receita.nome == dados.nome:
-                return {"receita repetida"}
+                raise HTTPException(status_code=HTTPStatus.CONFLICT, detail="Receita já existente")
     if len(receitas) == 0:
         id = 1
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
         if len(dados.nome) < 2 or len(dados.nome) > 50:
-            return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
-
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="o nome da receita deve ter entre 2 e 50 caracteres")
         if len(nova_receita.ingredientes) <= 0 or len(nova_receita.ingredientes) >= 21:
-            return {"mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20"}
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20")
         else:
             receitas.append(nova_receita)
             
@@ -115,9 +115,9 @@ def criar_receita(dados: CreateReceita):
         novo_id = id
         nova_receita = Receita(id = novo_id, nome = dados.nome, ingredientes = dados.ingredientes, modo_de_preparo = dados.modo_de_preparo)
         if len(dados.nome) < 2 or len(dados.nome) > 50:
-            return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="o nome da receita deve ter entre 2 e 50 caracteres")
         if len(nova_receita.ingredientes) <= 0 or len(nova_receita.ingredientes) >= 21:
-            return {"mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20"}
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="a receita deve ter no minimo 1 ingrediente, e no maximo 20")
         else:
             receitas.append(nova_receita)
     return nova_receita
@@ -126,12 +126,12 @@ def criar_receita(dados: CreateReceita):
 @app.put("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
 def update_receita(id: int, dados: CreateReceita):
     if len(dados.nome) < 2 or len(dados.nome) > 50:
-                return {"mensagem": "o nome da receita deve ter entre 2 e 50 caracteres"}
+                raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="o nome da receita deve ter entre 2 e 50 caracteres")
     if len(dados.ingredientes) < 1 or len(dados.ingredientes) > 20:
-                return {"mensagem": "a receita deve ter no minimo 1 ingrediente e no maximo 20"}
+                raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="a receita deve ter no minimo 1 ingrediente e no maximo 20")
     for receita in receitas:
         if receita.id != id and receita.nome == dados.nome:
-            return {"mensagem": "receita com esse nome já existe"}
+            raise HTTPException(status_code=HTTPStatus.CONFLICT, detail="receita com esse nome já existe")
         
     for i in range(len(receitas)):
         if receitas[i].id == id:
@@ -143,16 +143,16 @@ def update_receita(id: int, dados: CreateReceita):
             )
             receitas[i] = receita_atualizada
             return receita_atualizada
-    return {"mensagem": "Receita Não Encontrada"}
+    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="receita não encontrada")
 
 @app.delete("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
 def deletar_receita(id: int):
     if len(receitas) == 0:
-        return {"mensagem": "não há receitas para excluir"}
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="não há receitas para excluir")
     if len(receitas) > 0:
         for i in range(len(receitas)):
             if receitas[i].id == id:
                 receta_deletada = receitas[i].nome
                 receitas.pop(i)
                 return{"mensagem": f"Receita excluida: '{receta_deletada}'"}
-    return{"mensagem": "receita não encontrada"}
+    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="receita não encontrada")
