@@ -61,6 +61,23 @@ def get_receita_por_id(id: int):
     
     raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Receita por ID não encontrada")
         
+        
+@app.get("/usuarios/id/{id}", response_model=List[Usuario], status_code=HTTPStatus.OK)
+def get_usuario_por_id(id_usuario: str):
+    for usuario in usuarios:
+        if usuario.id == id_usuario:
+            return usuario
+        
+    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuario Não Encontrado")
+    
+@app.get("/receitas/id/{id}", response_model=List[Receita], status_code=HTTPStatus.OK)
+def get_receita_por_id(id: int):
+    for i in range(len(receitas)):
+        if receitas[i].id == id:
+            return receitas[i]
+    
+    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Receita por ID não encontrada")
+
 
 @app.post("/usuarios", response_model=UsuarioPublic, status_code=HTTPStatus.CREATED)
 def criar_usuario(dados: BaseUsuario):
@@ -106,7 +123,7 @@ def criar_receita(dados: CreateReceita):
         if len(dados.nome) < 2 or len(dados.nome) > 50:
             raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="o nome da receita deve ter entre 2 e 50 caracteres")
         if len(nova_receita.ingredientes) <= 0 or len(nova_receita.ingredientes) >= 21:
-            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="mensagem": "a receita deve ter no minimo 1 ingrediente, e no maximo 20")
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="a receita deve ter no minimo 1 ingrediente, e no maximo 20")
         else:
             receitas.append(nova_receita)
             
