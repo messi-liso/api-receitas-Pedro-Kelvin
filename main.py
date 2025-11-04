@@ -196,7 +196,6 @@ def criar_receita(dados: CreateReceita):
     
 
 @app.put("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
-@app.put("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
 def update_receita(id: int, dados: CreateReceita):
     if len(dados.nome) < 2 or len(dados.nome) > 50:
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="o nome da receita deve ter entre 2 e 50 caracteres")
@@ -218,7 +217,6 @@ def update_receita(id: int, dados: CreateReceita):
             return receita_atualizada
     raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="receita não encontrada")
 
-@app.delete("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
 @app.delete("/receitas/{id}", response_model=Receita, status_code=HTTPStatus.OK)
 def deletar_receita(id: int):
     if len(receitas) == 0:
