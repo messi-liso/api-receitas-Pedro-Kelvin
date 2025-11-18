@@ -15,7 +15,7 @@ table_registry.metadata.create_all(engine)
 
 with Session(engine) as session:
     mairon = User(
-        username="mairon", password="senha123", email="mairon@email.com"
+        nome_usuario="mairon", senha="senha123", email="mairon@email.com"
     )
     session.add(mairon)
     session.commit()
