@@ -1,10 +1,16 @@
-from fastapi import FastAPI, HTTPException
+from datetime import datetime
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
-# Importando todos os schemas necessários
 from schema import CreateReceita, Receita, Usuario, UsuarioPublic, BaseUsuario
+from config import settings
 from http import HTTPStatus
 import re # Importando re para o desafio de validação de senha
+from models import User
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from database import get_session
+
 
 app = FastAPI(title='livro de receitas')
 
@@ -32,39 +38,44 @@ def hello():
 # --- ROTAS DE USUÁRIOS (Conforme PDF) ---
 
 @app.post("/usuarios", status_code=HTTPStatus.CREATED, response_model=UsuarioPublic)
-def create_usuario(dados: BaseUsuario):
+def create_usuario(dados: BaseUsuario, session: Session = Depends(get_session)):
     """
     Cria um novo usuário.
     Valida se o email já existe.
     Valida a senha (desafio extra).
     """
-    # 3. Validação de email duplicado
-    for usuario in usuarios:
-        if usuario.email == dados.email:
+    db_user = session.scalar(
+        select(User).where(
+            (User.nome_usuario == dados.nome_usuario) | (User.email == dados.email)
+        )
+    )
+   
+    if db_user:
+       if db_user.nome_usuario == dados.nome_usuario:
             raise HTTPException(
-                status_code=HTTPStatus.CONFLICT, 
-                detail="Este email já está em uso."
-            )
-            
-    # Desafio Extra: Validar senha
+               status_code=HTTPStatus.CONFLICT,
+               detail='Nome de usuário já existe',
+           )
+       elif db_user.email == dados.email:
+           raise HTTPException(
+               status_code=HTTPStatus.CONFLICT,
+               detail='Email já existe',
+           )
+           
+    db_user = User(
+        nome_usuario=dados.nome_usuario, senha=dados.senha, email=dados.email
+    )
+
     if not validar_senha(dados.senha):
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="A senha deve conter letras e números."
         )
-
-    # 2. Lógica de criação (similar a receitas)
-    novo_id = len(usuarios) + 1
-    novo_usuario = Usuario(
-        id=novo_id,
-        nome_usuario=dados.nome_usuario,
-        email=dados.email,
-        senha=dados.senha  # Em um app real, faríamos o hash da senha aqui
-    )
-    usuarios.append(novo_usuario)
     
-    # O response_model=UsuarioPublic cuidará de não retornar a senha
-    return novo_usuario
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
 
 @app.get("/usuarios", status_code=HTTPStatus.OK, response_model=List[UsuarioPublic])
 def get_todos_usuarios():
