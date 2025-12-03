@@ -78,84 +78,67 @@ def create_usuario(dados: BaseUsuario, session: Session = Depends(get_session)):
     return db_user
 
 @app.get("/usuarios", status_code=HTTPStatus.OK, response_model=List[UsuarioPublic])
-def get_todos_usuarios():
-    """
-    (a) Retorna todos os usuários.
-    """
-    return usuarios
+def get_todos_usuarios(
+    skip: int = 0, limit: int = 100, session: Session = Depends(get_session)
+):
+    users = session.scalars(select(User).offset(skip).limit(limit)).all()
+    return users
 
 @app.get("/usuarios/{nome_usuario}", response_model=UsuarioPublic, status_code=HTTPStatus.OK)
-def get_usuario_por_nome(nome_usuario: str):
-    """
-    (b) Retorna um usuário específico pelo nome.
-    """
-    for usuario in usuarios:
-        if usuario.nome_usuario == nome_usuario:
-            return usuario
-            
+def get_usuario_por_nome(nome_usuario: str, session: Session = Depends(get_session)):
+    db_user = session.scalar(
+        select(User).where((User.nome_usuario == nome_usuario))
+    )
+    if db_user:
+        return db_user
+    
     raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuário não encontrado")
 
 @app.get("/usuarios/id/{id}", response_model=UsuarioPublic, status_code=HTTPStatus.OK)
-def get_usuario_por_id(id: int):
-    """
-    (c) Retorna um usuário específico pelo ID.
-    (Corrigindo a função que já existia no seu código)
-    """
-    for usuario in usuarios:
-        if usuario.id == id:
-            return usuario
+def get_usuario_por_id(id: int, session: Session = Depends(get_session)):
+    db_user = session.scalar(
+        select(User).where((User.id == id))
+    )
+    if db_user:
+        return db_user
         
     raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuário não encontrado")
     
 @app.put("/usuarios/{id}", response_model=UsuarioPublic, status_code=HTTPStatus.OK)
-def update_usuario(id: int, dados: BaseUsuario):
-    """
-    Atualiza um usuário existente pelo ID.
-    """
+def update_usuario(id: int, dados: BaseUsuario, session: Session = Depends(get_session)):
+    
+    db_user = session.scalar(select(User).where(User.id == id))
+    if not db_user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado'
+        )
+        
+    db_user.nome_usuario = dados.nome_usuario
+    db_user.senha = dados.senha
+    db_user.email = dados.email
+    session.commit()
+    session.refresh(db_user)
     # Desafio Extra: Validar senha
     if not validar_senha(dados.senha):
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="A senha deve conter letras e números."
         )
-
-    # Validação de email duplicado (ignorando o email do próprio usuário)
-    for u in usuarios:
-        if u.email == dados.email and u.id != id:
-            raise HTTPException(
-                status_code=HTTPStatus.CONFLICT, 
-                detail="Este email já está em uso por outro usuário."
-            )
-
-    # Encontrar e atualizar o usuário
-    for i in range(len(usuarios)):
-        if usuarios[i].id == id:
-            usuario_atualizado = Usuario(
-                id=id,
-                nome_usuario=dados.nome_usuario,
-                email=dados.email,
-                senha=dados.senha
-            )
-            usuarios[i] = usuario_atualizado
-            return usuario_atualizado
-            
-    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuário não encontrado")
+    return db_user
 
 @app.delete("/usuarios/{id}", response_model=UsuarioPublic, status_code=HTTPStatus.OK)
-def delete_usuario(id: int):
-    """
-    Deleta um usuário pelo ID.
-    """
-    for i in range(len(usuarios)):
-        if usuarios[i].id == id:
-            usuario_deletado = usuarios.pop(i)
-            return usuario_deletado
-            
-    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuário não encontrado")
+def delete_usuario(id: int, session: Session = Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == id))
 
-
-# --- ROTAS DE RECEITAS (Seu código original, sem alterações) ---
-
+    if not db_user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado'
+        )
+        
+    session.delete(db_user)
+    session.commit()
+    
+    return db_user
 @app.get('/receitas', response_model=List[Receita], status_code=HTTPStatus.OK)
 def get_todas_receitas():
     return receitas
